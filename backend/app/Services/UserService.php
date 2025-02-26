@@ -4,11 +4,11 @@ namespace App\Services;
 
 use App\Models\Activity;
 use App\Models\User;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
-use Throwable;
 
 class UserService
 {
@@ -27,46 +27,52 @@ class UserService
         try {
             DB::beginTransaction();
 
-            // Log::info('UserService: Creating new user', ['data' => $data]);
+            Log::info('UserService: Creating new user', ['data' => $data]);
 
+            // Set profile picture default value
             $profile_picture = 'user-default.png';
 
+            // Replace default profile picture to user uploaded picture
             if (isset($data['profile_picture'])) {
                 $profile_picture = $data['profile_picture']->store('photos', 'public');
             }
 
-            $validator = Validator::make($data, [
-                'name'              => 'required|string|max:255',
-                'email'             => 'required|string|email|max:255|unique:users',
-                'password'          => 'required|string|min:8|confirmed',
-                'phone'             => 'required|string',
-                'profile_picture'   => 'nullable|image|mimes:jpeg,jpg,png,gif|max:2048'
-            ]);
+            // Validate user input
+            $validatedData = $this->validateData($data);
 
-            if ($validator->fails()) {
-                return response()->json($validator->errors(), 422);
-            }
-
+            // Create new user
             $user = User::create([
-                'name'              => $data['name'],
-                'email'             => $data['email'],
-                'password'          => Hash::make($data['password']),
-                'phone'             => $data['phone'],
+                'name'              => $validatedData['name'],
+                'email'             => $validatedData['email'],
+                'password'          => Hash::make($validatedData['password']),
+                'phone'             => $validatedData['phone'],
                 'profile_picture'   => $profile_picture,
                 'role'              => 'customer'
             ]);
 
-            $this->logActivity('User Registration', 'User registered successfully', request()->ip(), 'success', $user->id);
+            // Generate token
+            $token = $this->createToken($user);
+
+            // Log successfull register activity into table
+            $this->logActivity('User Registration', 'User registered successfully', 'success', $user);
 
             DB::commit();
 
-            return $user;
-        } catch (Throwable $e) {
+            return [
+                'user'  => $user,
+                'token' => $token
+            ];
+        } catch (Exception $e) {
             DB::rollBack();
 
-            // Log::info('UserService: Failed creating new user', $e->getMessage());
+            Log::error('UserService: Failed creating new user: ' . $e->getMessage());
 
-            $this->logActivity('User Registration', $e->getMessage(), request()->ip(), 'failed');
+            // Log failed register activity into table
+            if (isset($user)) {
+                $this->logActivity('User Registration', 'User registration failed: ' . $e->getMessage(), 'failed', $user);
+            }
+
+            throw $e;
         }
     }
 
@@ -84,14 +90,35 @@ class UserService
         return $user->delete($id);
     }
 
-    private function logActivity($action, $details, $ipAddress, $status, $userId = null)
+    public function login($data)
+    {
+        //
+    }
+
+    private function validateData(array $data)
+    {
+        return Validator::make($data, [
+            'name'              => 'required|string|max:255',
+            'email'             => 'required|string|email|max:255|unique:users',
+            'password'          => 'required|string|min:8|confirmed',
+            'phone'             => 'required|string',
+            'profile_picture'   => 'nullable|image|mimes:jpeg,jpg,png,gif|max:2048'
+        ])->validate();
+    }
+
+    private function createToken($user)
+    {
+        return $user->createToken('authToken')->plainTextToken;
+    }
+
+    private function logActivity($action, $details, $status, $user)
     {
         Activity::create([
             'action'        => $action,
             'details'       => $details,
-            'ip_address'    => $ipAddress,
+            'ip_address'    => request()->ip(),
             'status'        => $status,
-            'user_id'       => $userId
+            'user_id'       => $user->id
         ]);
     }
 }
