@@ -40,8 +40,7 @@ class UserService
                 'email'             => 'required|string|email|max:255|unique:users',
                 'password'          => 'required|string|min:8|confirmed',
                 'phone'             => 'required|string',
-                'profile_picture'   => 'nullable|image|mimes:jpeg,jpg,png,gif|max:2048',
-                // 'role'              => 'required|string'
+                'profile_picture'   => 'nullable|image|mimes:jpeg,jpg,png,gif|max:2048'
             ]);
 
             if ($validator->fails()) {
