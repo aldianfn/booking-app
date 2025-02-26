@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Activity;
 use App\Models\User;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -38,7 +39,7 @@ class UserService
             }
 
             // Validate user input
-            $validatedData = $this->validateData($data);
+            $validatedData = $this->validateRegisterData($data);
 
             // Create new user
             $user = User::create([
@@ -53,8 +54,8 @@ class UserService
             // Generate token
             $token = $this->createToken($user);
 
-            // Log successfull register activity into table
-            $this->logActivity('User Registration', 'User registered successfully', 'success', $user);
+            // Log successfull register activity
+            $this->logActivity($user, 'User Registration', 'User registered successfully', 'success');
 
             DB::commit();
 
@@ -67,9 +68,9 @@ class UserService
 
             Log::error('UserService: Failed creating new user: ' . $e->getMessage());
 
-            // Log failed register activity into table
+            // Log failed register activity
             if (isset($user)) {
-                $this->logActivity('User Registration', 'User registration failed: ' . $e->getMessage(), 'failed', $user);
+                $this->logActivity($user, 'User Registration', 'User registration failed: ' . $e->getMessage(), 'failed');
             }
 
             throw $e;
@@ -90,12 +91,87 @@ class UserService
         return $user->delete($id);
     }
 
-    public function login($data)
+    public function login(array $data)
     {
-        //
+        try {
+            DB::beginTransaction();
+
+            // Validate user input
+            $validatedData = $this->validateLoginData($data);
+
+            if (Auth::attempt(['email' => $validatedData['email'], 'password' => $validatedData['password']])) {
+                // Get user data
+                $user = Auth::user();
+
+                // Generate token
+                $token = $this->createToken($user);
+
+                // Log successfull login activity
+                $this->logActivity($user, 'User Login', 'User logged in successfully', 'success');
+
+                DB::commit();
+
+                return [
+                    'user'  => $user,
+                    'token' => $token
+                ];
+            } else {
+                // Log failed login activity
+                $this->logActivity(null, 'User Login', 'User login failed: Invalid credentials', 'success');
+
+                throw new Exception('Invalid credentials');
+            }
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            Log::error('UserService: Login failed: ' . $e->getMessage());
+
+            // Log failed login activity
+            if (isset($user)) {
+                $this->logActivity($user, 'User Login', 'User login failed: ' . $e->getMessage(), 'failed');
+            }
+
+            throw $e;
+        }
     }
 
-    private function validateData(array $data)
+    public function logout()
+    {
+        try {
+            DB::beginTransaction();
+
+            $user = Auth::user();
+
+            if ($user) {
+                // Revoke token
+                $user->tokens()->delete();
+
+                // Log logout activity
+                $this->logActivity($user, 'User Logout', 'User logged out successfully', 'success');
+
+                DB::commit();
+
+                return [
+                    'message' => 'Logout successfull'
+                ];
+            } else {
+                throw new Exception('User not authenticated');
+            }
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            Log::error('UserService: Logout failed: ' . $e->getMessage());
+
+            // Log failed logout activity
+            if (isset($user)) {
+                $this->logActivity($user, 'User Logout', 'User logout failed: ' . $e->getMessage(), 'failed');
+            }
+
+            throw $e;
+        }
+    }
+
+    private function validateRegisterData(array $data)
     {
         return Validator::make($data, [
             'name'              => 'required|string|max:255',
@@ -106,19 +182,27 @@ class UserService
         ])->validate();
     }
 
+    private function validateLoginData(array $data)
+    {
+        return Validator::make($data, [
+            'email'             => 'required|string|email|max:255',
+            'password'          => 'required|string|min:8'
+        ])->validate();
+    }
+
     private function createToken($user)
     {
         return $user->createToken('authToken')->plainTextToken;
     }
 
-    private function logActivity($action, $details, $status, $user)
+    private function logActivity($user, $action, $details, $status)
     {
         Activity::create([
             'action'        => $action,
             'details'       => $details,
             'ip_address'    => request()->ip(),
             'status'        => $status,
-            'user_id'       => $user->id
+            'user_id'       => $user ? $user->id : null
         ]);
     }
 }

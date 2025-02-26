@@ -31,4 +31,36 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
+    public function login(Request $request)
+    {
+        try {
+            $user = $this->userService->login($request->all());
+
+            return response()->json($user, 200);
+        } catch (Exception $e) {
+            Log::error('Login failed: ' . $e->getMessage());
+
+            return response()->json([
+                'error'     => 'Login failed',
+                'message'   => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function logout(Request $request)
+    {
+        try {
+            $user = $this->userService->logout();
+
+            return response()->json($user, 200);
+        } catch (\Exception $e) {
+            Log::error('Logout failed: ' . $e->getMessage());
+
+            return response()->json([
+                'error'     => 'Logout failed',
+                'message'   => $e->getMessage(),
+            ], 500);
+        }
+    }
 }

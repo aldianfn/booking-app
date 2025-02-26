@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('action');
             $table->string('details')->nullable();
             $table->string('ip_address');
-            $table->string('status', ['success', 'failed']);
-            $table->foreignId('user_id');
+            $table->enum('status', ['success', 'failed']);
+            $table->foreignId('user_id')->nullable();
             $table->timestamps();
         });
     }
