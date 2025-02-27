@@ -2,24 +2,24 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\AuthService;
 use Exception;
 use Illuminate\Http\Request;
-use App\Services\UserService;
 use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
-    protected $userService;
+    protected $authService;
 
-    public function __construct(UserService $userService)
+    public function __construct(AuthService $authService)
     {
-        $this->userService = $userService;
+        $this->authService = $authService;
     }
 
     public function register(Request $request)
     {
         try {
-            $user = $this->userService->create($request->all());
+            $user = $this->authService->register($request->all());
 
             return response()->json($user, 201);
         } catch (Exception $e) {
@@ -35,7 +35,7 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         try {
-            $user = $this->userService->login($request->all());
+            $user = $this->authService->login($request->all());
 
             return response()->json($user, 200);
         } catch (Exception $e) {
@@ -51,7 +51,7 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         try {
-            $user = $this->userService->logout();
+            $user = $this->authService->logout();
 
             return response()->json($user, 200);
         } catch (\Exception $e) {

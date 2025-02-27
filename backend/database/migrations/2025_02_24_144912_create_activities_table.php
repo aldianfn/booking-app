@@ -13,10 +13,12 @@ return new class extends Migration
     {
         Schema::create('activities', function (Blueprint $table) {
             $table->id();
-            $table->string('action');
-            $table->string('details')->nullable();
+            $table->string('path');
+            $table->string('method');
             $table->string('ip_address');
-            $table->enum('status', ['success', 'failed']);
+            $table->string('user_agent');
+            $table->text('request_data')->nullable();
+            $table->string('status')->nullable();
             $table->foreignId('user_id')->nullable();
             $table->timestamps();
         });

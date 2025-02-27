@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class Activity extends Model
 {
     protected $fillable = [
-        'action',
-        'details',
+        'path',
+        'method',
         'ip_address',
+        'user_agent',
+        'request_data',
         'status',
         'user_id'
     ];

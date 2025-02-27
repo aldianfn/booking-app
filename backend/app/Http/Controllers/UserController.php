@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Activity;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,7 +13,7 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
             $user = Auth::user();
@@ -20,6 +21,7 @@ class UserController extends Controller
             if ($user) {
                 return response()->json($user, 200);
             } else {
+
                 throw new \Exception('User not authenticated');
             }
         } catch (\Exception $e) {
@@ -48,8 +50,24 @@ class UserController extends Controller
             $user = Auth::user();
 
             if ($user) {
+                Activity::create([
+                    'action'        => 'Accessed profile',
+                    'details'       => 'User successfully accessing /user to check user profile',
+                    'ip_address'    => request()->ip(),
+                    'status'        => 'success',
+                    'user_id'       => $user ? $user->id : null
+                ]);
+
                 return response()->json($user, 200);
             } else {
+                Activity::create([
+                    'action'        => 'Accessed profile',
+                    'details'       => 'User failed to accessing /user',
+                    'ip_address'    => request()->ip(),
+                    'status'        => 'failed',
+                    'user_id'       => $user ? $user->id : null
+                ]);
+
                 throw new \Exception('User not authenticated');
             }
         } catch (\Exception $e) {
