@@ -28,7 +28,7 @@ class AuthController extends Controller
             return response()->json([
                 'error'     => 'Registration failed',
                 'message'   => $e->getMessage()
-            ], 500);
+            ], 401);
         }
     }
 
@@ -44,7 +44,7 @@ class AuthController extends Controller
             return response()->json([
                 'error'     => 'Login failed',
                 'message'   => $e->getMessage()
-            ], 500);
+            ], 401);
         }
     }
 
