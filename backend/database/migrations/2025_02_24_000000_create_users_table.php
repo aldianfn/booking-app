@@ -19,7 +19,6 @@ return new class extends Migration
             $table->string('password');
             $table->string('phone');
             $table->string('profile_picture')->nullable();
-            $table->enum('role', ['admin', 'customer']);
             $table->rememberToken();
             $table->timestamps();
         });
