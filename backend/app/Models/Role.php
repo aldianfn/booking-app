@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class Role extends Model
 {
     protected $fillable = [
-        'role_id'
+        'role_name'
     ];
+
+    public function user()
+    {
+        return $this->hasOne(User::class);
+    }
 }
