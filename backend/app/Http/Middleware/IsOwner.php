@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class Admin
+class IsOwner
 {
     /**
      * Handle an incoming request.
@@ -15,12 +15,8 @@ class Admin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // if (!Auth::check() || Auth::user()->isAdmin()) {
-        //     return response()->json(['message' => 'Unauthorized. Admin access required.'], 403);
-        // }
-
-        if (!$request->user()->isAdmin()) {
-            return response()->json(['message' => 'Unauthorized. Admin access required.'], 403);
+        if (!$request->user()->isAdmin() && !$request->user()->isOwner()) {
+            return response()->json(['message' => 'Unauthorized. Owner access required.'], 403);
         }
 
         return $next($request);

@@ -65,4 +65,14 @@ class User extends Authenticatable
     {
         return $this->hasRole('admin');
     }
+
+    public function isOwner()
+    {
+        return $this->hasRole('owner');
+    }
+
+    public function hotels()
+    {
+        return $this->hasMany(Hotel::class);
+    }
 }
