@@ -45,7 +45,16 @@ class RoleController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        try {
+            $role = $this->roleService->create($request->all());
+
+            return response()->json(['role' => $role], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error'     => $e->getMessage(),
+                'message'   => 'Failed creating role'
+            ], 401);
+        }
     }
 
     /**

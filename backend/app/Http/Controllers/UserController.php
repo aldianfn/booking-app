@@ -16,7 +16,7 @@ class UserController extends Controller
     public function index(Request $request)
     {
         try {
-            $user = Auth::user();
+            $user = User::all();
 
             if ($user) {
                 return response()->json($user, 200);

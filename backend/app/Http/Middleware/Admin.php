@@ -16,10 +16,14 @@ class Admin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::user() && Auth::user()->hasRole('admin')) {
-            return $next($request);
+        // if (!Auth::check() || Auth::user()->isAdmin()) {
+        //     return response()->json(['message' => 'Unauthorized. Admin access required.'], 403);
+        // }
+
+        if (!$request->user()->isAdmin()) {
+            return response()->json(['message' => 'Unauthorized. Admin access required.'], 403);
         }
 
-        return response()->json(['message' => 'Unauthorized'], 403);
+        return $next($request);
     }
 }
