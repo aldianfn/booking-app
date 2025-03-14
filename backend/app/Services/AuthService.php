@@ -13,9 +13,9 @@ class AuthService
 {
     public function register(array $data)
     {
-        try {
-            DB::beginTransaction();
+        DB::beginTransaction();
 
+        try {
             Log::info('AuthService: Creating new user', ['data' => $data]);
 
             // Set profile picture default value
@@ -59,9 +59,9 @@ class AuthService
 
     public function login(array $data)
     {
-        try {
-            DB::beginTransaction();
+        DB::beginTransaction();
 
+        try {
             // Validate user input
             $validatedData = $this->validateLoginData($data);
 
@@ -92,9 +92,9 @@ class AuthService
 
     public function logout()
     {
-        try {
-            DB::beginTransaction();
+        DB::beginTransaction();
 
+        try {
             $user = Auth::user();
 
             if ($user) {
