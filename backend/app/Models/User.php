@@ -24,7 +24,7 @@ class User extends Authenticatable
         'password',
         'phone',
         'profile_picture',
-        'role'
+        'role_id'
     ];
 
     /**
@@ -48,5 +48,21 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    public function hasRole($roleName)
+    {
+        // dd($roleName);
+        return $this->role->role_name === $roleName;
+    }
+
+    public function isAdmin()
+    {
+        return $this->hasRole('admin');
     }
 }

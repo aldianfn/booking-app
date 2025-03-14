@@ -13,9 +13,9 @@ class AuthService
 {
     public function register(array $data)
     {
-        try {
-            DB::beginTransaction();
+        DB::beginTransaction();
 
+        try {
             Log::info('AuthService: Creating new user', ['data' => $data]);
 
             // Set profile picture default value
@@ -36,7 +36,7 @@ class AuthService
                 'password'          => Hash::make($validatedData['password']),
                 'phone'             => $validatedData['phone'],
                 'profile_picture'   => $profile_picture,
-                'role'              => 'customer'
+                'role_id'           => $validatedData['role_id']
             ]);
 
             // Generate token
@@ -59,9 +59,9 @@ class AuthService
 
     public function login(array $data)
     {
-        try {
-            DB::beginTransaction();
+        DB::beginTransaction();
 
+        try {
             // Validate user input
             $validatedData = $this->validateLoginData($data);
 
@@ -92,9 +92,9 @@ class AuthService
 
     public function logout()
     {
-        try {
-            DB::beginTransaction();
+        DB::beginTransaction();
 
+        try {
             $user = Auth::user();
 
             if ($user) {
@@ -125,7 +125,8 @@ class AuthService
             'email'             => 'required|string|email|max:255|unique:users',
             'password'          => 'required|string|min:8|confirmed',
             'phone'             => 'required|string',
-            'profile_picture'   => 'nullable|image|mimes:jpeg,jpg,png,gif|max:2048'
+            'profile_picture'   => 'nullable|image|mimes:jpeg,jpg,png,gif|max:2048',
+            'role_id'           => 'required'
         ])->validate();
     }
 
