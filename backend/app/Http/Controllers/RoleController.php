@@ -61,9 +61,18 @@ class RoleController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Role $role)
+    public function show($id)
     {
-        //
+        try {
+            $role = $this->roleService->getRoleById($id);
+
+            return response()->json(['role' => $role], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'error'     => $e->getMessage(),
+                'message'   => 'Role not found'
+            ]);
+        }
     }
 
     /**
@@ -104,7 +113,7 @@ class RoleController extends Controller
             return response()->json([
                 'error'     => $e->getMessage(),
                 'message'   => 'Failed deleting role'
-            ], 401);
+            ], 403);
         }
     }
 }

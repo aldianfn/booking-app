@@ -28,6 +28,24 @@ class RoleService
         }
     }
 
+    public function getRoleById(int $id)
+    {
+        try {
+            $role = Role::where('id', $id)->first();
+
+            if (!$role) {
+                throw new Exception('Role not found');
+            }
+
+            return [
+                'success'   => true,
+                'role'   => $role
+            ];
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
     public function create(array $data)
     {
         DB::beginTransaction();
