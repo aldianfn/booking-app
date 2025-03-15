@@ -133,7 +133,7 @@ class RoleService
     public function validateRoleData(array $data)
     {
         return Validator::make($data, [
-            'role_name' => 'required|max:255|unique:roles'
+            'role_name' => 'required|string|max:255|unique:roles'
         ])->validate();
     }
 

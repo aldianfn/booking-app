@@ -57,7 +57,16 @@ class HotelController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        try {
+            $hotel = $this->hotelService->create($request->all());
+
+            return response()->json(['hotel' => $hotel], 201);
+        } catch (Exception $e) {
+            return response()->json([
+                'error'     => $e->getMessage(),
+                'message'   => 'Failed creating hotel'
+            ], 401);
+        }
     }
 
     /**
