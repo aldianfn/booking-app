@@ -65,6 +65,72 @@ class HotelService
         }
     }
 
+    public function update(array $data, int $id)
+    {
+        DB::beginTransaction();
+
+        try {
+            $validatedData = $this->validateHotelData($data);
+
+            $hotel = Hotel::where('id', $id)->lockForUpdate()->first();
+
+            if (!$hotel) {
+                throw new Exception('Hotel not found');
+            }
+
+            $hotel->hotel_name = $validatedData['hotel_name'];
+            $hotel->address = $validatedData['address'];
+            $hotel->city = $validatedData['city'];
+            $hotel->province = $validatedData['province'];
+            $hotel->phone = $validatedData['phone'];
+            $hotel->email = $validatedData['email'];
+
+            $hotel->save();
+
+            DB::commit();
+
+            return [
+                'success'   => true,
+                'hotel'     => $hotel
+            ];
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            throw $e;
+        }
+    }
+
+    public function delete(int $id)
+    {
+        DB::beginTransaction();
+
+        try {
+            $hotel = Hotel::where('id', $id)->lockForUpdate()->first();
+
+            if (!$hotel) {
+                throw new Exception('Hotel not found');
+            }
+
+            // Add later
+            // if ($this->isHotelInUse($hotel)) {
+            //     throw new Exception('Cannot delete hotel because it assign to rooms')
+            // }
+
+            $hotel->delete();
+
+            DB::commit();
+
+            return [
+                'success'   => true,
+                'message'   => 'Hotel deleted successfully'
+            ];
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            throw new $e;
+        }
+    }
+
     public function validateHotelData(array $data)
     {
         return Validator::make($data, [
@@ -82,5 +148,10 @@ class HotelService
         return Validator::make($perPage, [
             'per_page'  => 'nullable|integer|max:100'
         ]);
+    }
+
+    private function isHotelInUse(Hotel $hotel)
+    {
+        return DB::table('rooms')->where('hotel_id', $hotel->id)->exists();
     }
 }

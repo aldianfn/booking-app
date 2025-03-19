@@ -108,16 +108,34 @@ class HotelController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Hotel $hotel)
+    public function update(Request $request, $id)
     {
-        //
+        try {
+            $hotel = $this->hotelService->update($request->all(), $id);
+
+            return response()->json(['hotel' => $hotel], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'error'     => $e->getMessage(),
+                'message'   => 'Failed updating hotel'
+            ], 401);
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Hotel $hotel)
+    public function destroy($id)
     {
-        //
+        try {
+            $hotel = $this->hotelService->delete($id);
+
+            return response()->json(['hotel' => $hotel], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'error'     => $e->getMessage(),
+                'message'   => 'Failed deleting hotel'
+            ], 403);
+        }
     }
 }
