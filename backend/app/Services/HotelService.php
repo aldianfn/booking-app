@@ -4,22 +4,23 @@ namespace App\Services;
 
 use App\Models\Hotel;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class HotelService
 {
-    public function getAllHotels()
+    public function getAllHotels(?string $search = null, int $perPage = 10)
     {
         try {
-            $hotels = Hotel::all();
+            $query = Hotel::query();
 
-            if (!$hotels) {
-                throw new Exception('Hotel not found');
+            if ($search) {
+                $query->searchHotel($search);
             }
 
-            return $hotels;
+            return $query->paginate($perPage);
         } catch (Exception $e) {
             throw $e;
         }
@@ -65,5 +66,12 @@ class HotelService
             'phone'         => 'required|string|max:255',
             'email'         => 'required|string|email|max:255'
         ])->validate();
+    }
+
+    public function validatePerPage(int $perPage)
+    {
+        return Validator::make($perPage, [
+            'per_page'  => 'nullable|integer|max:100'
+        ]);
     }
 }

@@ -16,11 +16,11 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    Route::resource('/user', UserController::class);
+    Route::apiResource('/user', UserController::class);
 
-    Route::resource('/roles', RoleController::class)->middleware(Admin::class);
+    Route::apiResource('/roles', RoleController::class)->middleware(Admin::class);
 
-    Route::resource('/hotel', HotelController::class)->except('get')->middleware(IsOwner::class);
+    Route::apiResource('/hotel', HotelController::class)->except('get')->middleware(IsOwner::class);
 });
 
 Route::get('/hotel', [HotelController::class, 'index']);

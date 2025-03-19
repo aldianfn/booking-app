@@ -19,21 +19,24 @@ class HotelController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $hotels = $this->hotelService->getAllHotels();
+            $perPage = $request->query('per_page', 10);
+            $search = $request->query('search');
 
-            // if (!$hotels) {
-            //     return response()->json([
-            //         'success'   => true,
-            //         'hotels'    => 'Hotel not found'
-            //     ], 200);
-            // }
+            $hotels = $this->hotelService->getAllHotels($search, $perPage);
 
             return response()->json([
                 'success'   => true,
-                'hotels'    => $hotels
+                'hotels'    => $hotels->items(),
+                'meta'      => [
+                    'current_page'  => $hotels->currentPage(),
+                    'last_page'     => $hotels->lastPage(),
+                    'per_page'      => $hotels->perPage(),
+                    'total'         => $hotels->total(),
+                    'search_query'  => $search
+                ]
             ]);
         } catch (Exception $e) {
             return response()->json([

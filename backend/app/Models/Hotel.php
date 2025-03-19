@@ -20,4 +20,19 @@ class Hotel extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function scopeSearchHotel($query, $search)
+    {
+        if ($search) {
+            $query->where(function ($query) use ($search) {
+                $searchableFields = ['hotel_name', 'address', 'city', 'province'];
+
+                foreach ($searchableFields as $field) {
+                    $query->orWhere($field, 'like', "%{$search}%");
+                }
+            });
+        }
+
+        return $query;
+    }
 }
