@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Validator;
 
 class HotelService
 {
-    public function getAllHotels(?string $search = null, int $perPage = 10)
+    public function getAllHotels(array $filters = [], ?string $search = null, int $perPage = 10)
     {
         try {
             $query = Hotel::query();
@@ -19,6 +19,10 @@ class HotelService
             if ($search) {
                 $query->searchHotel($search);
             }
+
+            $sortField = $filters['sort_by'] ?? 'created_at';
+            $sortDirection = $filters['sort_direction'] ?? 'desc';
+            $query->orderBy($sortField, $sortDirection);
 
             return $query->paginate($perPage);
         } catch (Exception $e) {

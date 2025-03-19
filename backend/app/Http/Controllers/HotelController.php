@@ -23,19 +23,30 @@ class HotelController extends Controller
     {
         try {
             $perPage = $request->query('per_page', 10);
+
             $search = $request->query('search');
 
-            $hotels = $this->hotelService->getAllHotels($search, $perPage);
+            $filters = [
+                'sort_by'           => $request->query('sort_by'),
+                'sort_direction'    => in_array($request->query('sort_direction'), ['asc', 'desc']) ? $request->query('sort_direction') : 'desc'
+            ];
+
+            $filters = array_filter($filters, function ($value) {
+                return $value !== null;
+            });
+
+            $hotels = $this->hotelService->getAllHotels($filters, $search, $perPage);
 
             return response()->json([
                 'success'   => true,
                 'hotels'    => $hotels->items(),
                 'meta'      => [
-                    'current_page'  => $hotels->currentPage(),
-                    'last_page'     => $hotels->lastPage(),
-                    'per_page'      => $hotels->perPage(),
-                    'total'         => $hotels->total(),
-                    'search_query'  => $search
+                    'current_page'      => $hotels->currentPage(),
+                    'last_page'         => $hotels->lastPage(),
+                    'per_page'          => $hotels->perPage(),
+                    'total'             => $hotels->total(),
+                    'search_query'      => $search,
+                    'applied_filters'   => $filters
                 ]
             ]);
         } catch (Exception $e) {
