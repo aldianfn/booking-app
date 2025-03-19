@@ -16,10 +16,15 @@ class HotelService
         try {
             $query = Hotel::query();
 
+            // Apply search using scope
             if ($search) {
                 $query->searchHotel($search);
             }
 
+            // Apply all filter
+            $query->applyFilters($filters);
+
+            // Apply sorting
             $sortField = $filters['sort_by'] ?? 'created_at';
             $sortDirection = $filters['sort_direction'] ?? 'desc';
             $query->orderBy($sortField, $sortDirection);

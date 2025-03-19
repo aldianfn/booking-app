@@ -22,15 +22,21 @@ class HotelController extends Controller
     public function index(Request $request)
     {
         try {
+            // Get pagination parameter with default of 10
             $perPage = $request->query('per_page', 10);
 
+            // Get search parameter
             $search = $request->query('search');
 
+            // Get all filters parameter
             $filters = [
+                'city'              => $request->query('city'),
+                'province'          => $request->query('province'),
                 'sort_by'           => $request->query('sort_by'),
                 'sort_direction'    => in_array($request->query('sort_direction'), ['asc', 'desc']) ? $request->query('sort_direction') : 'desc'
             ];
 
+            // Filter out null value
             $filters = array_filter($filters, function ($value) {
                 return $value !== null;
             });
