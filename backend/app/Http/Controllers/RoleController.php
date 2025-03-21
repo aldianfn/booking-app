@@ -108,12 +108,12 @@ class RoleController extends Controller
         try {
             $role = $this->roleService->delete($id);
 
-            return response()->json(['role' => $role], 200);
+            return response()->json(['message' => $role], 200);
         } catch (Exception $e) {
             return response()->json([
                 'error'     => $e->getMessage(),
                 'message'   => 'Failed deleting role'
-            ], 403);
+            ], $e->getCode() ?: 500);
         }
     }
 }

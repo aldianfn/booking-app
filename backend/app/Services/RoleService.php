@@ -108,11 +108,11 @@ class RoleService
             $role = Role::where('id', $id)->lockForUpdate()->first();
 
             if (!$role) {
-                throw new Exception('Role not found');
+                throw new Exception('Role not found', 404);
             }
 
             if ($this->isRoleInUse($role)) {
-                throw new Exception('Cannot delete role becasue it assign to users');
+                throw new Exception('Cannot delete role becasue it assign to users', 403);
             }
 
             $role->delete();
@@ -126,7 +126,7 @@ class RoleService
         } catch (Exception $e) {
             DB::rollBack();
 
-            throw new $e;
+            throw $e;
         }
     }
 
@@ -139,6 +139,6 @@ class RoleService
 
     private function isRoleInUse(Role $role)
     {
-        return DB::table('users')->where('role_id', $role->id)->exists();
+        return $role->users()->exists();
     }
 }
