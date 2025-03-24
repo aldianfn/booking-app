@@ -81,7 +81,7 @@ class RoleService
             $role = Role::where('id', $id)->lockForUpdate()->first();
 
             if (!$role) {
-                throw new Exception('Role not found');
+                throw new Exception('Role not found', 404);
             }
 
             $role->role_name = $validatedData['role_name'];

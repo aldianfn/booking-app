@@ -96,7 +96,7 @@ class RoleController extends Controller
             return response()->json([
                 'error'     => $e->getMessage(),
                 'message'   => 'Failed updating role'
-            ], 401);
+            ], $e->getCode() ?: 500);
         }
     }
 
